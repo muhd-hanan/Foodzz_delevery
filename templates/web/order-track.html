@@ -1,0 +1,152 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block container %}
+{% load extras %}
+
+<header class="h-20 shadow-md">
+    <section class="wrapper mx-auto px-4 h-full flex items-center justify-between">
+        <div class="w-1/5">
+            <a href="{% url 'web:orders' %}">
+                <img src="{% static 'web/images/arrow.png' %}" alt="Back" class="w-5 md:w-6">
+            </a>
+        </div>
+
+        <div class="flex-grow text-center">
+            <h1 class="text-2xl md:text-3xl font-bold text-[#515151]">Order Tracking</h1>
+        </div>
+
+        <div class="w-1/5"></div>
+    </section>
+</header>
+
+<main class="py-10">
+    <section class="container mx-auto px-4">
+        <div class="max-w-xl mx-auto shadow-lg rounded-2xl bg-white p-4 sm:p-6">
+
+            <div class="border-b pb-5">
+                <a href="#" class="flex flex-col sm:flex-row items-start text-left">
+                    <img src="{{order.store.image.url}}" alt="{{order.store.name}}" class="w-full sm:w-24 h-auto rounded-lg mb-4 sm:mb-0 sm:mr-6 flex-shrink-0">
+                    
+                    <div class="flex-grow">
+                        <h3 class="text-[#515151] text-xl font-semibold mb-2">
+                            {{order.store.name}}
+                        </h3>
+                        <p class="text-[#515151] text-base mb-3">
+                            {{order.store.tagline}}
+                        </p>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+                            <div class="flex items-center gap-1 text-amber-500">
+                                <i class="fas fa-star text-base"></i>
+                                <span class="font-semibold">{{order.store.rating}}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-slate-600">
+                                <i class="fas fa-clock text-green-600"></i>
+                                <p>{{order.store.time}} min</p>
+                            </div> 
+                            <div class="flex items-center gap-2 text-red-600">
+                                <i class="fas fa-tag"></i>
+                                <span class="font-semibold">{{order.store.offer}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="pt-6 space-y-8">
+                <div>
+                    <h2 class="text-lg md:text-xl font-semibold">Order #{{ order.order_id }}</h2>
+                    <p class="text-xs md:text-sm text-gray-500">Mail Id: {{ order.customer.user.email }}</p>
+                </div>
+
+<div class="max-w-4xl mx-auto p-6 bg-white  rounded-lg mt-6">
+    <h2 class="text-2xl font-bold mb-8 text-gray-800">Track Your Order</h2>
+
+    <div class="relative flex justify-between items-center">
+        {% for step in steps %}
+        <div class="flex-1 flex flex-col items-center relative z-10">
+            
+            <!-- Step circle -->
+            <div class="w-12 h-12 rounded-full flex items-center justify-center
+                        border-4
+                        {% if step.completed %}border-green-500 bg-green-100 text-green-600{% else %}border-gray-300 bg-gray-100 text-gray-400{% endif %}">
+                <i class="fa {{ step.icon }} text-xl"></i>
+            </div>
+
+            <!-- Step label -->
+            <span class="mt-2 text-sm font-medium text-center
+                        {% if step.completed %}text-green-600{% else %}text-gray-500{% endif %}">
+                {{ step.label }}
+            </span>
+
+            <!-- Connector line (except last step) -->
+            {% if not forloop.last %}
+            <div class="absolute top-6 left-1/2 w-full h-1 -z-10">
+                <div class="h-1 bg-gray-300 w-full"></div>
+                {% if step.completed %}
+                <div class="h-1 bg-green-500 w-full absolute top-0 left-0"></div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+                
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-semibold mb-2">Shipping Address</h3>
+                    <address class="text-sm text-gray-700 leading-6 not-italic">
+                        <strong>Address Type:</strong> {{ order.address.address_type }}<br />
+                        <strong>Landmark:</strong> {{ order.address.landmark }}<br />
+                        <strong>Address:</strong> {{ order.address.address }}<br />
+                        {% if is_numeric %}
+                            <strong>Building Number:</strong> {{ order.address.appartment }}
+                        {% else %}
+                            <strong>Apartment:</strong> {{ order.address.appartment }} 
+                        {% endif %}
+                    </address>
+                </div>
+
+                <div class="border-t pt-6">
+                    <h3 class="text-lg font-semibold mb-4">Items and Bill</h3>
+                    <div class="space-y-3">
+                        {% for item in order_items %}
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.name }}" class="w-12 h-12 object-cover rounded-xl" />
+                                    <div>
+                                        <p class="font-medium text-sm md:text-base">{{ item.product }}</p>
+                                        <p class="text-xs text-gray-500">Qty: {{ item.qty }}</p>
+                                    </div>
+                                </div>
+                                <p class="font-semibold text-sm md:text-base">₹{{ item.amnt }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="border-t pt-4 space-y-2">
+                    <div class="flex justify-between text-sm md:text-base">
+                        <p class="text-gray-600">Item Total:</p>
+                        <p class="font-semibold">₹{{ order.sub_total }}</p>
+                    </div>
+                    <div class="flex justify-between text-sm md:text-base">
+                        <p class="text-gray-600">Delivery Charge:</p>
+                        <p class="font-semibold">₹{{ order.delivery_charge }}</p>
+                    </div>
+                    <div class="flex justify-between text-sm md:text-base">
+                        <p class="text-gray-600">Offer Amount:</p>
+                        <p class="font-semibold text-green-600">- ₹{{ offer }}</p>
+                    </div>
+                    <div class="flex justify-between text-base md:text-lg font-bold pt-2">
+                        <p>Total:</p>
+                        <p>₹{{ order.total }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% endblock %}

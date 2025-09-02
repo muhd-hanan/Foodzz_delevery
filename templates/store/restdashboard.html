@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% load static %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Admin Panel</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .sidebar-link-active { background-color: #ecfdf5; color: #059669; font-weight: 600; }
+    .sidebar-link-active i { color: #059669; }
+</style>
+</head>
+<body class="text-slate-800 bg-slate-50">
+
+<div class="flex min-h-screen">
+    <!-- Mobile Overlay -->
+    <div id="overlay" class="fixed inset-0 bg-black/40 z-30 hidden lg:hidden"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-white text-slate-600 w-64 fixed top-0 left-0 h-full z-40 lg:translate-x-0 -translate-x-full transition-transform duration-300 ease-in-out border-r border-slate-200 flex flex-col">
+        <div class="flex-grow">
+            <div class="p-4 flex justify-center items-center h-20 border-b border-slate-200">
+                <img src="{% static 'web/images/logo.png' %}" alt="logo" class="w-28">
+            </div>
+            <nav class="mt-4">
+                <ul>
+                    <li><a href="{% url 'restaurant:restdashboard' %}" class="flex items-center gap-4 px-6 py-3 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-300 ease-in-out sidebar-link-active"><i class="fa-solid fa-chart-line w-5 text-center text-slate-400"></i><span>Overview</span></a></li>
+                    <li><a href="{% url 'restaurant:category_list' %}" class="flex items-center gap-4 px-6 py-3 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-300 ease-in-out"><i class="fas fa-layer-group w-5 text-center text-slate-400"></i><span>Food Category</span></a></li>
+                    <li><a href="{% url 'restaurant:add_fooditem' %}" class="flex items-center gap-4 px-6 py-3 hover:bg-emerald-50 hover:text-emerald-600 transition-all duration-300 ease-in-out"><i class="fas fa-utensils w-5 text-center text-slate-400"></i><span>Food Items</span></a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-slate-200">
+            <a href="{% url 'web:logout' %}" class="flex items-center gap-4 px-4 py-3 text-slate-600 hover:bg-red-50 hover:text-red-600 transition-all duration-300 ease-in-out rounded-lg">
+                <i class="fas fa-sign-out-alt w-5 text-center"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div id="main-content" class="flex-1 lg:pl-64 transition-all duration-300 ease-in-out">
+        <header class="bg-slate-50/80 backdrop-blur-lg sticky top-0 z-20">
+            <div class="flex items-center p-4 h-20 border-b border-slate-200">
+                <button id="hamburger-btn" class="lg:hidden text-slate-600 hover:text-emerald-500 transition-colors duration-300 ease-in-out">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 ml-4 lg:ml-0 truncate">{{store.name}}: Dashboard</h2>
+            </div>
+        </header>
+
+        <main class="p-4 sm:p-6 space-y-6">
+            <!-- Stat Cards -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center gap-4">
+                    <div class="w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-full">
+                        <i class="fas fa-receipt text-xl text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-sm">Total Orders</p>
+                        <h3 class="text-2xl font-bold text-slate-800">{{ total_orders }}</h3>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 flex items-center gap-4">
+                    <div class="w-12 h-12 flex items-center justify-center bg-emerald-100 rounded-full">
+                        <i class="fas fa-dollar-sign text-xl text-emerald-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 text-sm">Earnings</p>
+                        <h3 class="text-2xl font-bold text-slate-800">₹{{ total_earnings }}</h3>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Store Details -->
+            <section class="bg-white p-6 rounded-xl border border-slate-200">
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                    <img src="{{ store.image.url }}" alt="Restaurant Image" class="w-full md:w-32 h-32 object-cover rounded-lg">
+                    <div class="flex-grow">
+                        <h3 class="text-xl font-bold text-slate-800">{{store.name}}</h3>
+                        <p class="text-slate-500 mt-1 text-sm">{{store.tagline}}</p>
+                        <div class="flex flex-wrap items-center gap-4 mt-3 text-sm">
+                            <div class="flex items-center gap-1 text-amber-500">
+                                <i class="fas fa-star"></i>
+                                <span class="font-semibold text-slate-700">{{store.rating}}</span>
+                            </div>
+                            <span class="text-slate-300 hidden sm:block">|</span>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-clock text-slate-400"></i>
+                                <p class="text-slate-600">{{store.time}}</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 bg-emerald-50 text-emerald-700 text-xs font-semibold inline-flex items-center gap-2 px-3 py-1 rounded-full">
+                            <i class="fas fa-tag"></i>
+                            <span>{{store.offer}}</span>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <a href="{% url 'restaurant:edit_store' store.id %}">
+                            <button class="bg-emerald-600 w-full md:w-auto text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors duration-300 ease-in-out flex items-center justify-center gap-2 text-sm font-semibold">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Store</span>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders Table -->
+            <section class="bg-white p-6 rounded-xl border border-slate-200">
+                <h3 class="text-lg font-semibold text-slate-800 mb-4">Recent Orders</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-max w-full text-sm text-left text-slate-500">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                            <tr>
+                                <th class="px-6 py-3">Order ID</th>
+                                <th class="px-6 py-3">Customer</th>
+                                <th class="px-6 py-3">Address</th>
+                                <th class="px-6 py-3">Items</th>
+                                <th class="px-6 py-3">Delivery Boy</th>
+                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Amount</th>
+                                <th class="px-6 py-3 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="px-6 py-4 font-medium text-slate-900">#{{ order.order_id }}</td>
+                                <td class="px-6 py-4">{{ order.customer.user.first_name }} {{ order.customer.user.last_name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ order.address.address }}, {{ order.address.landmark }}<br><span class="text-xs text-slate-500">{{ order.address.phone_number }}</span></td>
+                                <td class="px-6 py-4">
+                                    {% for item in order.orderitem_set.all %}
+                                    {{ item.product.name }} (x{{ item.qty }})<br>
+                                    {% endfor %}
+                                </td>
+                                <td class="px-6 py-4">{% if order.delivery_boy %}{{ order.delivery_boy.name }}{% else %}<span class="text-slate-400">not assigned</span>{% endif %}</td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium 
+                                        {% if order.status == 'PLACED' %} bg-slate-100 text-slate-700
+                                        {% elif order.status == 'ACCEPTED' %} bg-blue-100 text-blue-700
+                                        {% elif order.status == 'OUT_FOR_DELIVERY' %} bg-amber-100 text-amber-700
+                                        {% elif order.status == 'DELIVERED' %} bg-green-100 text-green-700
+                                        {% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 font-semibold text-slate-900">₹{{ order.total }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    {% if order.status == 'PLACED' %}
+                                    <form method="post" action="{% url 'restaurant:store_accept_order' order.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="px-3 py-1 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 text-xs font-semibold">
+                                        Accept
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <i class="fa-solid fa-check-circle text-emerald-500 text-lg"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-10 text-slate-400">No recent orders found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<!-- Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const overlay = document.getElementById('overlay');
+
+        const toggleSidebar = () => {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        };
+
+        if (hamburgerBtn) {
+            hamburgerBtn.addEventListener('click', toggleSidebar);
+        }
+        if (overlay) {
+            overlay.addEventListener('click', toggleSidebar);
+        }
+    });
+</script>
+
+</body>
+</html>

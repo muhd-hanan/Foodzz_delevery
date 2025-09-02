@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800">
+
+    <div id="app" class="min-h-screen">
+
+        <header class="bg-white shadow-md sticky top-0 z-50 w-full">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <div class="flex-shrink-0">
+                        <img src="{% static 'web/images/logo.png' %}" alt="logo" class="w-28">
+                    </div>
+
+                    <div class="hidden md:block">
+                        <h1 class="text-xl font-bold text-slate-800">Delivery Dashboard</h1>
+                    </div>
+
+                    <div>
+                        <a href="{% url 'web:logout' %}" class="flex items-center space-x-2 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-800 rounded-lg transition-colors duration-200">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                           </svg>
+                           <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto p-4 sm:p-6 lg:p-10">
+            <div class="mb-10">
+               
+                <p class="text-slate-500 mt-1 text-lg">Welcome back, let's get these orders delivered!</p>
+            </div>
+
+            <section id="stats-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                <div class="bg-white p-6 rounded-2xl shadow-sm flex items-center space-x-4">
+                    <div class="bg-sky-100 text-sky-600 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">New Orders Available</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ new_orders_count }}</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm flex items-center space-x-4">
+                    <div class="bg-green-100 text-green-600 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Total Orders Taken</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ total_orders_taken }}</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm flex items-center space-x-4">
+                    <div class="bg-amber-100 text-amber-600 p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-500">Total Earnings</p>
+                        <p class="text-2xl font-bold text-slate-900">₹{{ total_earnings }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="new-order-details" class="mb-10">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">🔔 Available Orders for Pickup</h2>
+                <div class="space-y-6">
+                    {% for order in available_orders %}
+                    <div class="bg-white rounded-2xl shadow-sm overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+                        <div class="p-6">
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                                <div class="mb-4 md:mb-0">
+                                    <p class="text-xs font-semibold uppercase text-sky-500">Order ID: {{ order.order_id }}</p>
+                                    <p class="text-lg font-bold text-slate-800">{{ order.store.store_name }}</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="text-right">
+                                        <p class="text-sm text-slate-500">Order Value</p>
+                                        <p class="font-bold text-slate-800">₹{{ order.total }}</p>
+                                    </div>
+                                    <form method="post" action="{% url 'dboy:accept_order' order.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="px-6 py-3 rounded-lg bg-green-500 text-white font-semibold hover:bg-green-600 transition-colors duration-200 shadow-sm hover:shadow-md">
+                                            Accept Order
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-slate-200 my-6"></div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="flex space-x-4">
+                                    <div class="bg-slate-100 rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-800">Pickup From</p>
+                                        <p class="text-slate-600">{{ order.store.name }}</p>
+                                        <p class="text-sm text-slate-500">{{ order.store.address }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex space-x-4">
+                                    <div class="bg-slate-100 rounded-full h-12 w-12 flex-shrink-0 flex items-center justify-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-800">Deliver To</p>
+                                        <p class="text-slate-600">{{ order.address.address }}</p>
+                                        <p class="text-sm text-slate-500">{{ order.address.landmark }}</p>
+                                        <p class="text-sm font-medium text-slate-600 mt-1">{{ order.customer.user.get_full_name }} &middot; {{ order.address.phone_number }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-12 bg-white rounded-2xl shadow-sm">
+                        <p class="text-slate-500">No new orders available right now. Check back soon!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section id="accepted-orders-table">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">🚀 My Active Deliveries</h2>
+                <div class="bg-white rounded-2xl shadow-sm overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-500">
+                        <thead class="text-xs text-slate-700 uppercase bg-slate-200">
+                            <tr>
+                                <th scope="col" class="px-6 py-4">Order ID</th>
+                                <th scope="col" class="px-6 py-4">Restaurant</th>
+                                <th scope="col" class="px-6 py-4">Customer Details</th>
+                                <th scope="col" class="px-6 py-4">Amount</th>
+                                <th scope="col" class="px-6 py-4">Status</th>
+                                <th scope="col" class="px-6 py-4 text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in my_orders %}
+                            <tr class="bg-white border-b border-slate-200 hover:bg-slate-50">
+                                <th scope="row" class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap">{{ order.order_id }}</th>
+                                <td class="px-6 py-4">{{ order.store.name }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="font-medium text-slate-800">{{ order.customer.user.get_full_name }}</div>
+                                    <div class="text-slate-500">{{ order.address.phone_number }}</div>
+                                    <div class="text-slate-500">{{ order.address.address }}</div>
+                                </td>
+                                <td class="px-6 py-4 font-medium text-slate-800">₹{{ order.total }}</td>
+                                <td class="px-6 py-4">
+                                    {% if order.status == "Assign_Delevery_boy" %}
+                                        <span class="px-2.5 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded-full">Accepted</span>
+                                    {% elif order.status == "OUT_FOR_DELIVERY" %}
+                                        <span class="px-2.5 py-1 text-xs font-medium text-orange-800 bg-orange-100 rounded-full">Out for Delivery</span>
+                                    {% elif order.status == "COMPLETED" %}
+                                        <span class="px-2.5 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">Completed</span>
+                                    {% else %}
+                                        <span class="px-2.5 py-1 text-xs font-medium text-slate-800 bg-slate-100 rounded-full">{{ order.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    {% if order.status == "Assign_Delevery_boy" %}
+                                        <form method="post" action="{% url 'dboy:out_for_delivery' order.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-lg text-xs px-4 py-2">Start Delivery</button>
+                                        </form>
+                                    {% elif order.status == "OUT_FOR_DELIVERY" %}
+                                        <form method="post" action="{% url 'dboy:complete_order' order.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="font-medium text-white bg-sky-500 hover:bg-sky-600 rounded-lg text-xs px-4 py-2">Mark as Completed</button>
+                                        </form>
+                                    {% elif order.status == "COMPLETED" %}
+                                        <span class="font-semibold text-green-600">Done ✅</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-slate-500 py-10">You have no active deliveries.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+</body>
+</html>
