@@ -29,7 +29,7 @@ def index(request):
         "stores": stores,
         "customers": customers,
         "delivery_boys": delivery_boys,
-        "earnings": round(earnings, 2),   # optional: 2 decimal points
+        "earnings": round(earnings, 2),  
     }
     return render(request, 'manager/index.html', context)
 
@@ -50,7 +50,7 @@ def store_category(request):
         form = StoreCategoryForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect("manager:store_category")  # reload page after saving
+            return redirect("manager:store_category")  
     else:
         form = StoreCategoryForm()
 
@@ -73,7 +73,7 @@ def sliders(request):
         form = SliderForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect("manager:sliders")  # ✅ correct with namespace
+            return redirect("manager:sliders")  
     else:
         form = SliderForm()
 
@@ -116,7 +116,7 @@ def add_store(request):
         form = StoreForm(request.POST, request.FILES)
         if form.is_valid():
             store = form.save()
-            return redirect("manager:store_list")  # ✅ go back to list after adding
+            return redirect("manager:store_list")  
     else:
         form = StoreForm()
 

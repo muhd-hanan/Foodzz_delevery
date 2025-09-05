@@ -1,4 +1,4 @@
-# restaurant/views.py (or dboy/views.py if you separated apps)
+
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import DeliveryBoy
 from customer.models import Order
@@ -11,17 +11,16 @@ def dashboard(request):
 
     dboy = DeliveryBoy.objects.get(id=dboy_id)
 
-    # ✅ Show unassigned orders (ACCEPTED by restaurant, not yet taken by any dboy)
+  
     available_orders = Order.objects.filter(status="ACCEPTED", delivery_boy__isnull=True)
 
-    # ✅ Show this dboy’s assigned orders
+   
     my_orders = Order.objects.filter(delivery_boy=dboy)
 
-    # Hero stats
     new_orders_count = available_orders.count()
     total_orders_taken = my_orders.count()
     
-    # Total earnings = 10% of sum of all completed orders of this dboy
+   
     completed_earnings = my_orders.filter(status="COMPLETED").aggregate(total=Sum('total'))['total'] or 0
     total_earnings = round(completed_earnings * 0.1, 2)
 
@@ -43,7 +42,7 @@ def accept_order(request, order_id):
     dboy = DeliveryBoy.objects.get(id=dboy_id)
     order = get_object_or_404(Order, id=order_id)
 
-    if order.delivery_boy is None:  # only if not already taken
+    if order.delivery_boy is None:  
         order.delivery_boy = dboy
         order.status = "Assign_Delevery_boy"
         order.save()

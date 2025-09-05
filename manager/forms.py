@@ -116,7 +116,6 @@ class OfferForm(forms.ModelForm):
         }
 
 
-# manager/forms.py
 
 
 

@@ -100,7 +100,7 @@ class Order(models.Model):
     delivery_charge = models.IntegerField(default=0)
     delivery_boy = models.ForeignKey('dboy.DeliveryBoy', null=True, blank=True, on_delete=models.SET_NULL)
 
-    # ✅ Add this back
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PLACED')
 
     class Meta:
