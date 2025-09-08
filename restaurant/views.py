@@ -59,7 +59,7 @@ def edit_store(request, id):
         if form.is_valid():
             form.save()
             messages.success(request, "Store details updated successfully!")
-            return redirect("store:restdashboard")  # change to your store panel URL name
+            return redirect("store:restdashboard")  
     else:
         form = StoreEditForm(instance=store)
 
@@ -67,10 +67,10 @@ def edit_store(request, id):
 
 
 def add_category(request):
-    # check if store is logged in via session
+   
     store_id = request.session.get('store_id')
     if not store_id:
-        return redirect("login")   # no store session → force login
+        return redirect("login")   
 
     store = Store.objects.get(id=store_id)
 
@@ -78,13 +78,13 @@ def add_category(request):
         form = FoodCategoryForm(request.POST)
         if form.is_valid():
             category = form.save(commit=False)
-            category.store = store   # assign from session
+            category.store = store  
             category.save()
             return redirect("restaurant:category_list")
     else:
         form = FoodCategoryForm()
 
-    # ✅ fetch categories with food count
+   
     categories = (
         FoodCategory.objects.filter(store=store)
         .annotate(food_count=Count("fooditem"))
@@ -104,7 +104,7 @@ def delete_category(request, pk):
     store = Store.objects.get(id=store_id)
     category = get_object_or_404(FoodCategory, id=pk, store=store)
 
-    if request.method == "POST":   # only delete on POST for safety
+    if request.method == "POST":  
         category.delete()
         return redirect("restaurant:category_list")
 
@@ -117,24 +117,24 @@ def add_food_item(request):
     if not store_id:
         return redirect("login")
 
-    store = Store.objects.get(id=store_id)   # 👈 get store object
+    store = Store.objects.get(id=store_id)  
 
     if request.method == "POST":
-        form = FoodItemForm(request.POST, request.FILES, store=store)  # pass store
+        form = FoodItemForm(request.POST, request.FILES, store=store)  
         if form.is_valid():
             food_item = form.save(commit=False)
             food_item.save()
             return redirect("restaurant:add_fooditem")
     else:
-        form = FoodItemForm(store=store)  # pass store also on GET
+        form = FoodItemForm(store=store)  
 
-    # 👇 get all food items for this store
+   
     fooditems = FoodItem.objects.filter(categry__store=store)
 
     return render(request, "store/add_fooditem.html", {
         "form": form,
         "store": store,
-        "fooditems": fooditems,   # 👈 pass to template
+        "fooditems": fooditems,  
     })
 
 
